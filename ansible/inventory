@@ -1,0 +1,5 @@
+[master]
+devops-master ansible_host=MASTER_IP ansible_user=ubuntu
+
+[agent]
+devops-agent ansible_host=AGENT_IP ansible_user=ubuntu
