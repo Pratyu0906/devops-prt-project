@@ -1,37 +1,50 @@
 pipeline {
     agent { label 'devops-agent' }
-
     environment {
-        IMAGE_NAME = 'prtdemo:latest'
+        IMAGE_NAME = "prtdemo:latest"
+        CONTAINER_NAME = "prtdemo_container"
     }
-
     stages {
-        stage('Clone Repo') {
+        stage('Checkout Repo') {
             steps {
-                git url: 'https://github.com/Pratyu0906/devops-prt-project', branch: 'main'
+                git branch: 'main', url: 'https://github.com/Pratyu0906/devops-prt-project'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${IMAGE_NAME}", ".")
-                }
+                sh """
+                    echo "Building Docker image..."
+                    sudo docker build -t ${IMAGE_NAME} .
+                """
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                script {
-                    docker.image("${IMAGE_NAME}").run("-d -p 8081:80")
-                }
+                sh """
+                    echo "Stopping any existing container..."
+                    sudo docker rm -f ${CONTAINER_NAME} || true
+
+                    echo "Running Docker container..."
+                    sudo docker run -d --name ${CONTAINER_NAME} -p 8080:80 ${IMAGE_NAME}
+                """
             }
         }
 
-        stage('Verify') {
+        stage('Verify Container') {
             steps {
-                echo "Docker container running at http://<MASTER_IP>:8081"
+                sh """
+                    echo "Listing running containers..."
+                    sudo docker ps
+                """
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'echo "Pipeline finished"'
         }
     }
 }
