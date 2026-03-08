@@ -1,0 +1,9 @@
+- hosts: agent
+  become: yes
+
+  tasks:
+
+  - name: install docker
+    apt:
+      name: docker.io
+      state: present
